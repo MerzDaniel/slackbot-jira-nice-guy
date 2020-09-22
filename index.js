@@ -1,5 +1,6 @@
 
 import jiraClient from 'jira-connector'
+import { promises as fs } from 'fs'
 
 // https://www.npmjs.com/package/jira-connector?activeTab=explore
 // https://developer.atlassian.com/cloud/jira/platform/rest/v2/api-group-projects/
@@ -24,12 +25,32 @@ async function getAllSprintIssues(id) {
   return issues
 }
 
+const fileName = 'doneIssues.txt'
+async function loadDoneIssues() {
+  const t = await fs.readFile(fileName, { encoding: 'utf-8' })
+  const doneIssues = t.split('\n')
+  return doneIssues
+}
+async function persistDoneIssues(ids) {
+  await fs.writeFile(fileName, ids.join('\n'))
+}
+
 
 async function f() {
+  const doneIssues = await loadDoneIssues()
+  const sprintId = 118
   // await getAllBoards()
-  const stuff = await getAllSprintIssues(118)
+  const stuff = await getAllSprintIssues(sprintId)
   // console.log(stuff.issues)
-  console.log(stuff.map(({ fields: { status: { name } } }) => ({ name })))
-
+  // console.log(stuff.map(({ fields: { status: { name } } }) => ({ name })))
+  const dii = stuff.filter(({ fields: { status: { name } } }) => name === 'Done')
+  const newDoneIssues = dii.filter(({ id }) => !doneIssues.includes(id))
+  console.log(newDoneIssues)
+  if (newDoneIssues.length > 0) {
+    await persistDoneIssues([
+      ...doneIssues,
+      ...newDoneIssues.map(({ id }) => id ),
+    ])
+  }
 }
 f().then(() => console.log('DONE')).catch(e => console.error(e))
