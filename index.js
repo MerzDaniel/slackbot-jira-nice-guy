@@ -1,6 +1,7 @@
 
 import jiraClient from 'jira-connector'
 import { promises as fs } from 'fs'
+import { WebClient } from '@slack/web-api'
 
 // https://www.npmjs.com/package/jira-connector?activeTab=explore
 // https://developer.atlassian.com/cloud/jira/platform/rest/v2/api-group-projects/
@@ -13,6 +14,7 @@ var jira = new jiraClient({
     api_token: process.env.jiraToken
   }
 })
+const slackClient = new WebClient(process.env.slackToken)
 
 async function getAllBoards() {
   console.log(await jira.board.getAllBoards())
@@ -35,8 +37,16 @@ async function persistDoneIssues(ids) {
   await fs.writeFile(fileName, ids.join('\n'))
 }
 
+async function sendMsg(msg) {
+  await slackClient.chat.postMessage({
+    channel: process.env.conversationId,
+    text: msg,
+  })
+}
 
 async function f() {
+  await sendMsg('hello world')
+  return
   const doneIssues = await loadDoneIssues()
   const sprintId = 118
   // await getAllBoards()
