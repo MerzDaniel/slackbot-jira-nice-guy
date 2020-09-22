@@ -71,8 +71,10 @@ async function f() {
     await Promise.all(newDoneIssues.map(async ({ key, fields: { summary, issuetype: { name: issueType } } }) => {
       const msg = `:bell: New ${issueType} is Done :) ${summary}\nhttps://${process.env.jiraHost}/browse/${key}`
       await sendMsg(msg)
-      // console.log(msg)
     }))
   }
 }
-f().then(() => console.log('DONE')).catch(e => console.error(e))
+setInterval(
+  () => f().then(() => console.log('DONE')).catch(e => console.error(e)),
+  1000*60*2, // 2 min
+)
