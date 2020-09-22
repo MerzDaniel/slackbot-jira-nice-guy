@@ -23,7 +23,7 @@ async function getAllSprints() {
   console.log((await jira.board.getSprintsForBoard({ boardId: 1, startAt: 100 })).values)
 }
 async function getAllSprintIssues(id) {
-  const { issues } = await jira.sprint.getSprintIssues({ sprintId: id, fields: 'status' })
+  const { issues } = await jira.sprint.getSprintIssues({ sprintId: id, fields: 'status,issuetype' })
   return issues
 }
 
@@ -45,15 +45,17 @@ async function sendMsg(msg) {
 }
 
 async function f() {
-  await sendMsg('hello world')
-  return
+  // await sendMsg('hello world')
+
   const doneIssues = await loadDoneIssues()
-  const sprintId = 118
   // await getAllBoards()
-  const stuff = await getAllSprintIssues(sprintId)
-  // console.log(stuff.issues)
+  const stuff = await getAllSprintIssues(process.env.sprintId)
+  // filter for Tasks only (sub-tasks are also returned)
+  const sprintTasks = stuff.filter(({ fields: { issuetype: { name }}  }) => name !== 'Sub-task')
+  // return console.log(sprintTasks.map(({ fields: { issuetype: { name }}}) => name))
+  // return console.log(sprintTasks[0])
   // console.log(stuff.map(({ fields: { status: { name } } }) => ({ name })))
-  const dii = stuff.filter(({ fields: { status: { name } } }) => name === 'Done')
+  const dii = sprintTasks.filter(({ fields: { status: { name } } }) => name === 'Done')
   const newDoneIssues = dii.filter(({ id }) => !doneIssues.includes(id))
   console.log(newDoneIssues)
   if (newDoneIssues.length > 0) {
@@ -61,6 +63,10 @@ async function f() {
       ...doneIssues,
       ...newDoneIssues.map(({ id }) => id ),
     ])
+    // return;
+    await Promise.all(newDoneIssues.map(async ({ key }) => {
+      await sendMsg(`:bell: New Task is Done :) https://${process.env.jiraHost}/browse/${key}`)
+    }))
   }
 }
 f().then(() => console.log('DONE')).catch(e => console.error(e))
