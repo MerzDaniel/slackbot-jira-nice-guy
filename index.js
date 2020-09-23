@@ -20,6 +20,10 @@ const slackClient = new WebClient(process.env.slackToken)
 async function getAllBoards() {
   console.log(await jira.board.getAllBoards())
 }
+async function getIssue(issueId) {
+  const fields = 'status,issuetype,summary'
+  console.log(await jira.issue.getIssue({ issueId }))
+}
 async function getAllSprints() {
   console.log((await jira.board.getSprintsForBoard({ boardId: 1, startAt: 100 })).values)
 }
@@ -78,14 +82,17 @@ async function bot(postToSlack = true) {
 const r = f => f().then(() => console.log('DONE')).catch(e => console.error(e))
 function runBot() {
   setInterval(
-    () => r(f),
-    1000*JSON.parse(process.env.intervalInSecond) // 2 min
+    () => r(bot),
+    1000*JSON.parse(process.env.intervalInSeconds)
   )
 }
 
+const secondLastArg = process.argv[process.argv.length-2]
 const lastArg = process.argv[process.argv.length-1]
 if (lastArg.startsWith('sprint')) r(getAllSprints)
 else if (lastArg.startsWith('init')) bot(false)
 else if (lastArg.startsWith('start')) runBot()
+else if (secondLastArg.startsWith('issue')) getIssue(lastArg)
+else if (secondLastArg.startsWith('cron')) bot()
 else { console.log('Missing cmd args'); exit(1) }
 
