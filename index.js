@@ -76,5 +76,5 @@ async function f() {
 }
 setInterval(
   () => f().then(() => console.log('DONE')).catch(e => console.error(e)),
-  1000*60*2, // 2 min
+  1000*JSON.parse(process.env.intervalInSecond) // 2 min
 )
