@@ -93,6 +93,6 @@ if (lastArg.startsWith('sprint')) r(getAllSprints)
 else if (lastArg.startsWith('init')) bot(false)
 else if (lastArg.startsWith('start')) runBot()
 else if (secondLastArg.startsWith('issue')) getIssue(lastArg)
-else if (secondLastArg.startsWith('cron')) bot()
+else if (secondLastArg.startsWith('cron')) r(bot)
 else { console.log('Missing cmd args'); exit(1) }
 
