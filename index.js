@@ -2,6 +2,7 @@
 import jiraClient from 'jira-connector'
 import { promises as fs } from 'fs'
 import { WebClient } from '@slack/web-api'
+import { exit } from 'process'
 
 // https://www.npmjs.com/package/jira-connector?activeTab=explore
 // https://developer.atlassian.com/cloud/jira/platform/rest/v2/api-group-projects/
@@ -48,7 +49,7 @@ async function sendMsg(msg) {
   })
 }
 
-async function f() {
+async function bot(postToSlack = true) {
   // await sendMsg('hello world')
 
   const doneIssues = await loadDoneIssues()
@@ -70,11 +71,21 @@ async function f() {
     ])
     await Promise.all(newDoneIssues.map(async ({ key, fields: { summary, issuetype: { name: issueType } } }) => {
       const msg = `:bell: New ${issueType} is Done :) ${summary}\nhttps://${process.env.jiraHost}/browse/${key}`
-      await sendMsg(msg)
+      if (postToSlack) await sendMsg(msg)
     }))
   }
 }
-setInterval(
-  () => f().then(() => console.log('DONE')).catch(e => console.error(e)),
-  1000*JSON.parse(process.env.intervalInSecond) // 2 min
-)
+const r = f => f().then(() => console.log('DONE')).catch(e => console.error(e))
+function runBot() {
+  setInterval(
+    () => r(f),
+    1000*JSON.parse(process.env.intervalInSecond) // 2 min
+  )
+}
+
+const lastArg = process.argv[process.argv.length-1]
+if (lastArg.startsWith('sprint')) r(getAllSprints)
+else if (lastArg.startsWith('init')) bot(false)
+else if (lastArg.startsWith('start')) runBot()
+else { console.log('Missing cmd args'); exit(1) }
+
