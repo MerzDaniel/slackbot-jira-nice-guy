@@ -32,6 +32,7 @@ async function getAllSprintIssues(id) {
   const { issues } = await jira.sprint.getSprintIssues({ 
     sprintId: id, 
     fields,
+    maxResults: 1000,
   })
   return issues
 }
@@ -61,9 +62,10 @@ async function bot(postToSlack = true) {
   const stuff = await getAllSprintIssues(process.env.sprintId)
   // filter for Tasks only (sub-tasks are also returned)
   const sprintTasks = stuff.filter(({ fields: { issuetype: { name }}  }) => name !== 'Sub-task')
+  // const nonSprintTasks = stuff.filter(({ fields: { issuetype: { name }}  }) => name === 'Sub-task')
+  // console.log(nonSprintTasks.length)
+  // console.log(sprintTasks.map(({ fields: { issuetype: { name }, summary } }) => summary))
   // return console.log(sprintTasks.map(({ fields: { issuetype: { name }}}) => name))
-  // return console.log(sprintTasks[0])
-  // return console.log(sprintTasks)
   // console.log(stuff.map(({ fields: { status: { name } } }) => ({ name })))
   const dii = sprintTasks.filter(({ fields: { status: { name } } }) => name === 'Done')
   const newDoneIssues = dii.filter(({ id }) => !doneIssues.includes(id))
@@ -76,6 +78,7 @@ async function bot(postToSlack = true) {
     await Promise.all(newDoneIssues.map(async ({ key, fields: { summary, issuetype: { name: issueType } } }) => {
       const msg = `:bell: New ${issueType} is Done :) ${summary}\nhttps://${process.env.jiraHost}/browse/${key}`
       if (postToSlack) await sendMsg(msg)
+      else console.log(msg)
     }))
   }
 }
@@ -89,7 +92,8 @@ function runBot() {
 
 const secondLastArg = process.argv[process.argv.length-2]
 const lastArg = process.argv[process.argv.length-1]
-if (lastArg.startsWith('sprint')) r(getAllSprints)
+if (lastArg.startsWith('sprints')) r(getAllSprints)
+else if (lastArg.startsWith('sprint-tasks')) getAllSprintIssues(process.env.sprintId).then(console.log)
 else if (lastArg.startsWith('init')) bot(false)
 else if (lastArg.startsWith('start')) runBot()
 else if (secondLastArg.startsWith('issue')) getIssue(lastArg)
