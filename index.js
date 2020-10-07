@@ -76,7 +76,7 @@ async function bot(postToSlack = true) {
       ...newDoneIssues.map(({ id }) => id ),
     ])
     await Promise.all(newDoneIssues.map(async ({ key, fields: { summary, issuetype: { name: issueType } } }) => {
-      const msg = `:bell: New ${issueType} is Done :) ${summary}\nhttps://${process.env.jiraHost}/browse/${key}`
+      const msg = `:bell: New ${issueType} is Done! ${summary}\nhttps://${process.env.jiraHost}/browse/${key}`
       if (postToSlack) await sendMsg(msg)
       else console.log(msg)
     }))
