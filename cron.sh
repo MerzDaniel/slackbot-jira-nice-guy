@@ -1,6 +1,9 @@
 #!/bin/bash
-. /home/daniel/.bashrc
+.  ~/.profile
+export NVM_DIR="$HOME/.nvm"
+. "$NVM_DIR/nvm.sh"
 
-cd /home/daniel/git/slack-jira-bot ;
+cd ~/git/slackbot-jira-nice-guy ;
  . .env ; 
- /home/daniel/.nvm/versions/node/v12.14.1/bin/npx babel-node index.js cron >> /tmp/log-slack-jira-bot 
+ npx babel-node index.js cron >> /tmp/log-slack-jira-bot 
+
