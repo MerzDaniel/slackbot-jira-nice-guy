@@ -58,4 +58,4 @@ else if (lastArg.startsWith('init')) bot(false).then()
 else if (lastArg.startsWith('start')) runBot()
 else if (secondLastArg.startsWith('issue')) getIssue(lastArg)
 else if (lastArg.startsWith('cron')) r(bot)
-// else { console.log('Missing cmd args'); exit(1) }
+else { console.log('Missing cmd args'); exit(1) }
