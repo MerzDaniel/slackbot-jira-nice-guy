@@ -1,58 +1,7 @@
-
-import jiraClient from 'jira-connector'
-import { promises as fs } from 'fs'
-import { WebClient } from '@slack/web-api'
 import { exit } from 'process'
-
-// https://www.npmjs.com/package/jira-connector?activeTab=explore
-// https://developer.atlassian.com/cloud/jira/platform/rest/v2/api-group-projects/
-// https://docs.atlassian.com/jira-software/REST/7.0.4/#agile/1.0/board/{boardId}/sprint-getAllSprints
-
-var jira = new jiraClient({
-  host: process.env.jiraHost,
-  basic_auth: {
-    email: process.env.jiraUser,
-    api_token: process.env.jiraToken
-  }
-})
-const slackClient = new WebClient(process.env.slackToken)
-
-async function getAllBoards() {
-  console.log(await jira.board.getAllBoards())
-}
-async function getIssue(issueId) {
-  const fields = 'status,issuetype,summary'
-  console.log(await jira.issue.getIssue({ issueId }))
-}
-async function getAllSprints() {
-  console.log((await jira.board.getSprintsForBoard({ boardId: 1, startAt: 100 })).values)
-}
-async function getAllSprintIssues(id) {
-  const fields = 'status,issuetype,summary'
-  const { issues } = await jira.sprint.getSprintIssues({ 
-    sprintId: id, 
-    fields,
-    maxResults: 1000,
-  })
-  return issues
-}
-
-const fileName = 'doneIssues.txt'
-async function loadDoneIssues() {
-  const t = await fs.readFile(fileName, { encoding: 'utf-8' })
-  const doneIssues = t.split('\n')
-  return doneIssues
-}
-async function persistDoneIssues(ids) {
-  await fs.writeFile(fileName, ids.join('\n'))
-}
-
-async function sendMsg(msg) {
-  await slackClient.chat.postMessage({
-    channel: process.env.conversationId,
-    text: msg,
-  })
-}
+import {loadDoneIssues, persistDoneIssues} from "./persistance";
+import {getAllSprintIssues, getAllSprints, getIssue} from "./jira";
+import {sendMsg} from "./slack";
 
 async function bot(postToSlack = true) {
   // await sendMsg('hello world')
@@ -90,13 +39,18 @@ function runBot() {
   )
 }
 
+const quote = getRandomQuote()
+const msg = quote.text + " - " + quote.author
+console.log(msg)
+sendMsg(msg).then(console.log).catch(console.error)
+
+
 const secondLastArg = process.argv[process.argv.length-2]
 const lastArg = process.argv[process.argv.length-1]
 if (lastArg.startsWith('sprints')) r(getAllSprints)
 else if (lastArg.startsWith('sprint-tasks')) getAllSprintIssues(process.env.sprintId).then(console.log)
-else if (lastArg.startsWith('init')) bot(false)
+else if (lastArg.startsWith('init')) bot(false).then(() => {console.log('##### Bot was initialized')})
 else if (lastArg.startsWith('start')) runBot()
 else if (secondLastArg.startsWith('issue')) getIssue(lastArg)
 else if (lastArg.startsWith('cron')) r(bot)
-else { console.log('Missing cmd args'); exit(1) }
-
+// else { console.log('Missing cmd args'); exit(1) }
