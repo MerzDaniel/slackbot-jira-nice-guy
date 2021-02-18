@@ -29,8 +29,7 @@ async function bot(postToSlack = true) {
   if (newDoneIssues.length > 0) {
     let msg = 'New tasks are done! :muscle:\n'
     newDoneIssues.forEach(async ({ key, fields: { summary, issuetype: { name: issueType } } }) => {
-      const it = issueTypeToMsg(issueType)
-      msg += `- ${it} : ${summary}\nhttps://${process.env.jiraHost}/browse/${key}\n`
+      msg += `- *${issueType}*: ${summary}\nhttps://${process.env.jiraHost}/browse/${key}\n`
     })
     msg += `\n${getRandomQuote()}`
 
