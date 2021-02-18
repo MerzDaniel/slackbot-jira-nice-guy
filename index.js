@@ -4,6 +4,12 @@ import {getAllSprintIssues, getAllSprints, getIssue} from "./jira";
 import {sendMsg} from "./slack";
 import {getRandomQuote} from "./quotes";
 
+function issueTypeToMsg(issueType) {
+  if (issueType === 'Story') return `*${issueType}* :large_green_circle: `
+  if (issueType === 'Bug') return `*${issueType}* :red_circle: `
+  if (issueType === 'Task') return `*${issueType}* :large_blue_circle: `
+  else return `*${issueType}*`
+}
 async function bot(postToSlack = true) {
   // await sendMsg('hello world')
 
@@ -23,7 +29,8 @@ async function bot(postToSlack = true) {
   if (newDoneIssues.length > 0) {
     let msg = 'New tasks are done! :muscle:\n'
     newDoneIssues.forEach(async ({ key, fields: { summary, issuetype: { name: issueType } } }) => {
-      msg += `- *${issueType}*: ${summary}\nhttps://${process.env.jiraHost}/browse/${key}\n`
+      const it = issueTypeToMsg(issueType)
+      msg += `- ${it} : ${summary}\nhttps://${process.env.jiraHost}/browse/${key}\n`
     })
     msg += `\n${getRandomQuote()}`
 
