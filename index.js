@@ -21,9 +21,9 @@ async function bot(postToSlack = true) {
   const newDoneIssues = dii.filter(({ id }) => !doneIssues.includes(id))
   // console.log(newDoneIssues)
   if (newDoneIssues.length > 0) {
-    let msg = 'New tasks are Done! :muscle:\n'
+    let msg = 'New tasks are done! :muscle:\n'
     newDoneIssues.forEach(async ({ key, fields: { summary, issuetype: { name: issueType } } }) => {
-      msg += `- ${summary}\nhttps://${process.env.jiraHost}/browse/${key}\n`
+      msg += `- *${issueType}*: ${summary}\nhttps://${process.env.jiraHost}/browse/${key}\n`
     })
     msg += `\n${getRandomQuote()}`
 
