@@ -1,8 +1,17 @@
 import { exit } from 'process'
+import axios from 'axios'
 import {loadDoneIssues, persistDoneIssues} from "./persistance";
 import {getAllSprintIssues, getAllSprints, getIssue} from "./jira";
 import {sendMsg} from "./slack";
-import {getRandomQuote} from "./quotes";
+
+async function getJoke() {
+  // no I don't get it
+  const { data: joke } = await axios.get('https://v2.jokeapi.dev/joke/Programming')
+
+  if (joke.type === 'single') return joke.joke
+
+  return `*${joke.setup}*\n${joke.delivery}`
+}
 
 function issueTypeToMsg(issueType) {
   if (issueType === 'Story') return `*${issueType}* :large_green_circle: `
@@ -31,7 +40,7 @@ async function bot(postToSlack = true) {
     newDoneIssues.forEach(async ({ key, fields: { summary, issuetype: { name: issueType } } }) => {
       msg += `- *${issueType}*: ${summary}\nhttps://${process.env.jiraHost}/browse/${key}\n`
     })
-    msg += `\n${getRandomQuote()}`
+    msg += `\n${await getJoke()}`
 
     if (postToSlack) await sendMsg(msg)
     else console.log(msg)
