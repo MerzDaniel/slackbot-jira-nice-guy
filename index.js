@@ -77,6 +77,4 @@ function main() {
   else { console.log('Missing cmd args'); exit(1) }
 }
 
-// main()
-
-getJoke().then(console.log)
+main()
