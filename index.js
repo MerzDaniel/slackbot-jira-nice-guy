@@ -64,13 +64,17 @@ function runBot() {
 // console.log(msg)
 // sendMsg(msg).then(console.log).catch(console.error)
 
+function main() {
 
-const secondLastArg = process.argv[process.argv.length-2]
-const lastArg = process.argv[process.argv.length-1]
-if (lastArg.startsWith('sprints')) r(getAllSprints)
-else if (lastArg.startsWith('sprint-tasks')) getAllSprintIssues(process.env.sprintId).then(console.log)
-else if (lastArg.startsWith('init')) bot(false).then()
-else if (lastArg.startsWith('start')) runBot()
-else if (secondLastArg.startsWith('issue')) getIssue(lastArg)
-else if (lastArg.startsWith('cron')) r(bot)
-else { console.log('Missing cmd args'); exit(1) }
+  const secondLastArg = process.argv[process.argv.length-2]
+  const lastArg = process.argv[process.argv.length-1]
+  if (lastArg.startsWith('sprints')) r(getAllSprints)
+  else if (lastArg.startsWith('sprint-tasks')) getAllSprintIssues(process.env.sprintId).then(console.log)
+  else if (lastArg.startsWith('init')) bot(false).then()
+  else if (lastArg.startsWith('start')) runBot()
+  else if (secondLastArg.startsWith('issue')) getIssue(lastArg)
+  else if (lastArg.startsWith('cron')) r(bot)
+  else { console.log('Missing cmd args'); exit(1) }
+}
+
+main()
