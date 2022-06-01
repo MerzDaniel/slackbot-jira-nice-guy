@@ -6,7 +6,7 @@ import {sendMsg} from "./slack";
 
 async function getJoke() {
   // no I don't get it
-  const { data: joke } = await axios.get('https://v2.jokeapi.dev/joke/Programming')
+  const { data: joke } = await axios.get('https://v2.jokeapi.dev/joke/Programming?safe-mode')
 
   if (joke.type === 'single') return joke.joke
 
@@ -77,4 +77,6 @@ function main() {
   else { console.log('Missing cmd args'); exit(1) }
 }
 
-main()
+// main()
+
+getJoke().then(console.log)
