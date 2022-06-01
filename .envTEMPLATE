@@ -1,0 +1,9 @@
+export jiraToken=tokedito
+export jiraUser=some@users.email
+export jiraHost=actano.atlassian.net
+export slackToken=slackTokediTo
+
+export conversationId=channelDiChan
+export sprintId=234
+
+export intervalInSeconds=60
